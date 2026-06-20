@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { FileUpload } from "./components/FileUpload";
 import { SummaryCards } from "./components/SummaryCards";
+import { IncomeExpenseBreakdown } from "./components/IncomeExpenseBreakdown";
 import { ExpensesPieChart } from "./components/ExpensesPieChart";
 import { TopSpending } from "./components/TopSpending";
 import { TransactionsTable } from "./components/TransactionsTable";
@@ -111,6 +112,7 @@ function App() {
         {transactions.length > 0 && (
           <>
             <SummaryCards transactions={transactions} />
+            <IncomeExpenseBreakdown transactions={transactions} />
             <ExpensesPieChart transactions={transactions} />
             <TopSpending transactions={transactions} />
             <TransactionsTable

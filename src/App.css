@@ -166,6 +166,61 @@
   color: #ef4444;
 }
 
+.income-expense-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+.income-expense-card__title {
+  font-size: 1.1rem;
+  margin: 0 0 12px;
+}
+.income-expense-card__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 24px;
+}
+@media (max-width: 640px) {
+  .income-expense-card__body {
+    grid-template-columns: 1fr;
+  }
+}
+.income-expense-card__note {
+  text-align: center;
+  color: #4b5563;
+  font-size: 0.9rem;
+  margin: 4px 0 0;
+}
+.income-expense-card__income-list h3 {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+.income-expense-card__income-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.income-expense-card__income-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.88rem;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 6px;
+}
+.income-expense-card__income-amount {
+  color: #10b981;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
 .chart-card {
   background: white;
   border: 1px solid #e5e7eb;
