@@ -3,6 +3,7 @@ import "./App.css";
 import { FileUpload } from "./components/FileUpload";
 import { SummaryCards } from "./components/SummaryCards";
 import { ExpensesPieChart } from "./components/ExpensesPieChart";
+import { TopSpending } from "./components/TopSpending";
 import { TransactionsTable } from "./components/TransactionsTable";
 import { parseStatementFile } from "./lib/parseStatement";
 import { clearTransactions, loadTransactions, saveTransactions } from "./lib/storage";
@@ -111,6 +112,7 @@ function App() {
           <>
             <SummaryCards transactions={transactions} />
             <ExpensesPieChart transactions={transactions} />
+            <TopSpending transactions={transactions} />
             <TransactionsTable
               transactions={transactions}
               onUpdateCategory={handleUpdateCategory}
