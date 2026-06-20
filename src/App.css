@@ -166,6 +166,98 @@
   color: #ef4444;
 }
 
+.excess-card {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+.excess-card__title {
+  font-size: 1.1rem;
+  margin: 0 0 4px;
+}
+.excess-card__hint {
+  color: #92400e;
+  font-size: 0.85rem;
+  margin: 0 0 14px;
+}
+.excess-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.excess-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: white;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.excess-row__info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  font-size: 0.88rem;
+  flex: 1;
+  min-width: 0;
+}
+.excess-row__date {
+  color: #6b7280;
+  flex-shrink: 0;
+}
+.excess-row__description {
+  flex: 1;
+  min-width: 120px;
+}
+.excess-row__amount {
+  color: #ef4444;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.excess-row select {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+}
+
+.excess-card__assigned {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #fde68a;
+}
+.excess-card__assigned h3 {
+  font-size: 0.85rem;
+  color: #92400e;
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+.excess-card__assigned ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.excess-card__assigned li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+.excess-card__assigned-amount {
+  font-weight: 600;
+}
+
 .budget-card {
   background: white;
   border: 1px solid #e5e7eb;
@@ -182,14 +274,25 @@
   font-size: 0.85rem;
   margin: 0 0 16px;
 }
+.budget-card__salary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 16px;
+}
 .budget-card__salary {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
 }
 .budget-card__salary label {
   font-weight: 600;
+  font-size: 0.9rem;
+}
+.budget-card__salary input[type="date"] {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 7px 10px;
   font-size: 0.9rem;
 }
 .budget-card__salary-input,

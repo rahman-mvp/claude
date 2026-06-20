@@ -2,7 +2,7 @@ import type { BudgetPlan } from "./types";
 
 const STORAGE_KEY = "finance-app:budget:v1";
 
-const EMPTY_PLAN: BudgetPlan = { salary: 0, allocations: [] };
+const EMPTY_PLAN: BudgetPlan = { salary: 0, salaryDate: null, allocations: [] };
 
 export function loadBudgetPlan(): BudgetPlan {
   try {
@@ -17,7 +17,7 @@ export function loadBudgetPlan(): BudgetPlan {
     ) {
       return EMPTY_PLAN;
     }
-    return parsed;
+    return { salaryDate: null, ...parsed };
   } catch {
     return EMPTY_PLAN;
   }

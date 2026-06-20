@@ -6,6 +6,7 @@ import { IncomeExpenseBreakdown } from "./components/IncomeExpenseBreakdown";
 import { ExpensesPieChart } from "./components/ExpensesPieChart";
 import { TopSpending } from "./components/TopSpending";
 import { BudgetPlanner } from "./components/BudgetPlanner";
+import { ExcessSpendingPrompts } from "./components/ExcessSpendingPrompts";
 import { TransactionsTable } from "./components/TransactionsTable";
 import { parseStatementFile } from "./lib/parseStatement";
 import { clearTransactions, loadTransactions, saveTransactions } from "./lib/storage";
@@ -16,7 +17,11 @@ function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [fileStatuses, setFileStatuses] = useState<FileStatus[]>([]);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [budgetPlan, setBudgetPlan] = useState<BudgetPlan>({ salary: 0, allocations: [] });
+  const [budgetPlan, setBudgetPlan] = useState<BudgetPlan>({
+    salary: 0,
+    salaryDate: null,
+    allocations: [],
+  });
   const hasLoadedFromStorage = useRef(false);
 
   useEffect(() => {
@@ -80,6 +85,12 @@ function App() {
     setTransactions((prev) => prev.filter((t) => t.id !== id));
   }
 
+  function handleAssignAllocation(id: string, allocationName: string) {
+    setTransactions((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, allocationName } : t))
+    );
+  }
+
   function handleClearAll() {
     setTransactions([]);
     setFileStatuses([]);
@@ -122,6 +133,11 @@ function App() {
 
         {transactions.length > 0 && (
           <>
+            <ExcessSpendingPrompts
+              transactions={transactions}
+              plan={budgetPlan}
+              onAssign={handleAssignAllocation}
+            />
             <SummaryCards transactions={transactions} />
             <IncomeExpenseBreakdown transactions={transactions} />
             <ExpensesPieChart transactions={transactions} />

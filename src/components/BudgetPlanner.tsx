@@ -54,22 +54,34 @@ export function BudgetPlanner({ plan, onChange }: Props) {
     <div className="budget-card">
       <h2 className="budget-card__title">Зарплата и распределение сверх неё</h2>
       <p className="budget-card__hint">
-        Укажите зарплату, затем распишите, на что уходит сумма сверх неё — каждой статье можно
-        задать своё название и сумму.
+        Укажите сумму и дату зарплаты, затем заведите статьи (например, «сбережения»,
+        «развлечения») — когда траты после этой даты превысят зарплату, приложение спросит, к
+        какой статье отнести каждую такую транзакцию.
       </p>
 
-      <div className="budget-card__salary">
-        <label htmlFor="salary-input">Зарплата</label>
-        <div className="budget-card__salary-input">
+      <div className="budget-card__salary-row">
+        <div className="budget-card__salary">
+          <label htmlFor="salary-input">Зарплата</label>
+          <div className="budget-card__salary-input">
+            <input
+              id="salary-input"
+              type="text"
+              inputMode="decimal"
+              placeholder="0"
+              value={plan.salary === 0 ? "" : plan.salary.toString()}
+              onChange={(e) => updateSalary(e.target.value)}
+            />
+            <span>₸</span>
+          </div>
+        </div>
+        <div className="budget-card__salary">
+          <label htmlFor="salary-date-input">Дата получения</label>
           <input
-            id="salary-input"
-            type="text"
-            inputMode="decimal"
-            placeholder="0"
-            value={plan.salary === 0 ? "" : plan.salary.toString()}
-            onChange={(e) => updateSalary(e.target.value)}
+            id="salary-date-input"
+            type="date"
+            value={plan.salaryDate ?? ""}
+            onChange={(e) => onChange({ ...plan, salaryDate: e.target.value || null })}
           />
-          <span>₸</span>
         </div>
       </div>
 

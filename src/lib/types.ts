@@ -9,6 +9,10 @@ export interface Transaction {
   category: string;
   sourceFile: string;
   sourceBank: "kaspi" | "halyk";
+  /** Name of the budget allocation this spend was assigned to, once the user
+   * has answered "on what" for a transaction that pushed spending past the
+   * salary. Undefined until answered. */
+  allocationName?: string;
 }
 
 export interface BudgetAllocation {
@@ -19,6 +23,9 @@ export interface BudgetAllocation {
 
 export interface BudgetPlan {
   salary: number;
+  /** ISO yyyy-mm-dd date the salary was received. Spending is tracked from
+   * this date onward to detect when it exceeds the salary. */
+  salaryDate: string | null;
   allocations: BudgetAllocation[];
 }
 
