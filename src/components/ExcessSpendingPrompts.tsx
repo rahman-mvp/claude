@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { EXPENSE_CATEGORIES } from "../lib/types";
 import type { BudgetPlan, Transaction } from "../lib/types";
 
 interface Props {
@@ -31,6 +32,15 @@ export function ExcessSpendingPrompts({ transactions, plan, onAssign }: Props) {
 
     return excess.filter((t) => !t.allocationName);
   }, [transactions, plan.salaryDate, plan.salary]);
+
+  // Custom budget allocations (if any) come first, then the app's standard
+  // expense categories, so the dropdown is always useful even if the user
+  // hasn't set up custom allocations in BudgetPlanner.
+  const categoryOptions = useMemo(() => {
+    const customNames = plan.allocations.map((a) => a.name);
+    const merged = [...customNames, ...EXPENSE_CATEGORIES];
+    return Array.from(new Set(merged));
+  }, [plan.allocations]);
 
   const assignedTotals = useMemo(() => {
     if (!plan.salaryDate || plan.salary <= 0) return [];
@@ -80,9 +90,9 @@ export function ExcessSpendingPrompts({ transactions, plan, onAssign }: Props) {
                   <option value="" disabled>
                     Выберите статью…
                   </option>
-                  {plan.allocations.map((a) => (
-                    <option key={a.id} value={a.name}>
-                      {a.name}
+                  {categoryOptions.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
                     </option>
                   ))}
                   <option value={OTHER_OPTION}>{OTHER_OPTION}</option>
