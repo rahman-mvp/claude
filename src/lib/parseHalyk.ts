@@ -1,64 +1,103 @@
 import type { Transaction } from "./types";
 import { categorize } from "./categorize";
-import { extractRows, rowText } from "./pdfText";
+import { extractRows } from "./pdfText";
+import type { PageRow } from "./pdfText";
 
-// NOTE: no real Halyk Bank statement sample was available while building this
-// parser (unlike Kaspi, see parseKaspi.ts). It targets the commonly seen
-// layout — one row per operation with a date, free-text description and a
-// signed amount — using the same coordinate-based row reconstruction as the
-// Kaspi parser. If real statements use a different layout (e.g. separate
-// debit/credit columns), this is the place to adjust the regexes below.
+// Halyk statement table columns (left to right):
+// Дата проведения | Дата обработки | Описание операции [+ Сумма операции + Валюта операции,
+// both ignored here] | Приход в валюте счета | Расход в валюте счета | Комиссия операции |
+// № карточки/счета
+//
+// Each cell is rendered as a single PDF text item, but the "Сумма операции"/"Валюта операции"
+// cells are sometimes blank (e.g. when the operation amount is 0,00), which shifts how many
+// items a row has. Counting columns from the END of the row is reliable because the last four
+// cells (Приход, Расход, Комиссия, № карточки/счета) are always present. Multi-line
+// descriptions wrap onto their own row with no leading date — those are merged into the
+// description of the transaction above.
 
-const DATE_RE = /^(\d{2})\.(\d{2})\.(\d{4}|\d{2})$/;
-const AMOUNT_RE = /([+-]?)\s*([\d\s]{1,15},\d{2}|[\d\s]{1,15}\.\d{2})\s*(?:KZT|₸|тг\.?)?$/i;
+const DATE_RE = /^\d{2}\.\d{2}\.\d{4}$/;
+const AMOUNT_RE = /^-?[\d\s]+,\d{2}$/;
 
-const EXPENSE_HINTS = [
-  "покупка", "оплата", "снятие", "перевод исх", "списание", "комиссия",
-];
-const INCOME_HINTS = ["пополнение", "поступление", "зачисление", "перевод вход"];
-
-function toIsoDate(dd: string, mm: string, yyyy: string): string {
-  const year = yyyy.length === 2 ? `20${yyyy}` : yyyy;
-  return `${year}-${mm}-${dd}`;
+function isDate(text: string): boolean {
+  return DATE_RE.test(text.trim());
 }
 
 function parseAmount(raw: string): number {
   return parseFloat(raw.replace(/\s/g, "").replace(",", "."));
 }
 
-function inferSign(description: string, explicitSign: string): "+" | "-" {
-  if (explicitSign === "+") return "+";
-  if (explicitSign === "-") return "-";
-  const lower = description.toLowerCase();
-  if (INCOME_HINTS.some((h) => lower.includes(h))) return "+";
-  if (EXPENSE_HINTS.some((h) => lower.includes(h))) return "-";
-  // Default to expense — most personal-account statement lines are debits.
-  return "-";
+function toIsoDate(ddmmyyyy: string): string {
+  const [dd, mm, yyyy] = ddmmyyyy.split(".");
+  return `${yyyy}-${mm}-${dd}`;
 }
 
-function parseLine(
-  line: string
+interface Draft {
+  date: string;
+  descriptionParts: string[];
+  income: number;
+  expense: number;
+  commission: number;
+}
+
+function isNoiseLine(text: string): boolean {
+  return (
+    /Выписка по счету/i.test(text) ||
+    /Место печати Банка/i.test(text) ||
+    /Выписка действительна/i.test(text) ||
+    /^Дата Дата$/i.test(text) ||
+    /^Сумма( Валюта)?( Приход в)?( Расход в)?$/i.test(text) ||
+    /^проведения обработки Описание операции/i.test(text) ||
+    /^операции операции/i.test(text)
+  );
+}
+
+function startsNewTransaction(row: PageRow): boolean {
+  if (row.items.length < 7) return false;
+  return isDate(row.items[0].text) && isDate(row.items[1].text);
+}
+
+function buildDraft(row: PageRow): Draft {
+  const texts = row.items.map((i) => i.text.trim());
+  const date = toIsoDate(texts[0]);
+  const trailing = texts.slice(-4); // [income, expense, commission, card/account]
+  const [incomeRaw, expenseRaw, commissionRaw] = trailing;
+
+  const income = AMOUNT_RE.test(incomeRaw) ? parseAmount(incomeRaw) : 0;
+  const expense = AMOUNT_RE.test(expenseRaw) ? parseAmount(expenseRaw) : 0;
+  const commission = AMOUNT_RE.test(commissionRaw) ? parseAmount(commissionRaw) : 0;
+
+  // Description is the first free-text cell after the two dates; any
+  // "Сумма операции"/"Валюта операции" cells in between are ignored since we
+  // use Приход/Расход (already converted to account currency) for the amount.
+  const description = texts[2] ?? "";
+
+  return { date, descriptionParts: [description], income, expense, commission };
+}
+
+function finalizeDraft(
+  draft: Draft
 ): Omit<Transaction, "id" | "sourceFile" | "sourceBank"> | null {
-  const dateMatch = line.match(/^(\d{2}\.\d{2}\.\d{2,4})\s+(.*)$/);
-  if (!dateMatch) return null;
-  const dateParts = dateMatch[1].match(DATE_RE);
-  if (!dateParts) return null;
+  const description = draft.descriptionParts.join(" ").replace(/\s+/g, " ").trim();
+  let type: "income" | "expense";
+  let amount: number;
 
-  const rest = dateMatch[2].trim();
-  const amountMatch = rest.match(AMOUNT_RE);
-  if (!amountMatch) return null;
+  if (draft.income > 0) {
+    type = "income";
+    amount = draft.income;
+  } else if (draft.expense !== 0) {
+    type = "expense";
+    amount = Math.abs(draft.expense);
+  } else if (draft.commission !== 0) {
+    type = "expense";
+    amount = Math.abs(draft.commission);
+  } else {
+    return null;
+  }
 
-  const description = rest.slice(0, amountMatch.index).trim();
   if (description.length === 0) return null;
 
-  const amount = parseAmount(amountMatch[2]);
-  if (Number.isNaN(amount) || amount === 0) return null;
-
-  const sign = inferSign(description, amountMatch[1]);
-  const type = sign === "+" ? "income" : "expense";
-
   return {
-    date: toIsoDate(dateParts[1], dateParts[2], dateParts[3]),
+    date: draft.date,
     description,
     amount,
     type,
@@ -70,12 +109,35 @@ export async function parseHalykStatement(
   file: File
 ): Promise<Omit<Transaction, "id" | "sourceFile" | "sourceBank">[]> {
   const rows = await extractRows(file);
-  const lines = rows.map(rowText).filter((t) => t.length > 0);
-
   const results: Omit<Transaction, "id" | "sourceFile" | "sourceBank">[] = [];
-  for (const line of lines) {
-    const parsed = parseLine(line);
-    if (parsed) results.push(parsed);
+  let currentDraft: Draft | null = null;
+
+  for (const row of rows) {
+    if (row.items.length === 0) continue;
+
+    if (startsNewTransaction(row)) {
+      if (currentDraft) {
+        const finalized = finalizeDraft(currentDraft);
+        if (finalized) results.push(finalized);
+      }
+      currentDraft = buildDraft(row);
+    } else if (currentDraft) {
+      // Continuation of a wrapped description (or trailing account number) —
+      // append free text, skipping cells that are pure amounts/currency codes
+      // or page header/footer boilerplate that repeats on every page.
+      const text = row.items
+        .map((i) => i.text.trim())
+        .filter((t) => t.length > 0)
+        .join(" ");
+      if (text.length > 0 && !isNoiseLine(text)) {
+        currentDraft.descriptionParts.push(text);
+      }
+    }
+  }
+
+  if (currentDraft) {
+    const finalized = finalizeDraft(currentDraft);
+    if (finalized) results.push(finalized);
   }
 
   if (results.length === 0) {
