@@ -166,6 +166,119 @@
   color: #ef4444;
 }
 
+.budget-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+.budget-card__title {
+  font-size: 1.1rem;
+  margin: 0 0 4px;
+}
+.budget-card__hint {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin: 0 0 16px;
+}
+.budget-card__salary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.budget-card__salary label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.budget-card__salary-input,
+.budget-card__add-amount,
+.budget-allocation-row__amount {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 10px;
+}
+.budget-card__salary-input input,
+.budget-card__add-amount input,
+.budget-allocation-row__amount input {
+  border: none;
+  padding: 8px 0;
+  font-size: 0.95rem;
+  width: 110px;
+  outline: none;
+}
+.budget-card__salary-input span,
+.budget-card__add-amount span,
+.budget-allocation-row__amount span {
+  color: #9ca3af;
+}
+
+.budget-card__allocations {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.budget-allocation-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.budget-allocation-row__name {
+  flex: 1;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+}
+
+.budget-card__add-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.budget-card__add-row input[type="text"]:not(.budget-card__add-amount input) {
+  flex: 1;
+  min-width: 160px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+}
+.budget-card__add-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.budget-card__add-btn:hover {
+  background: #2563eb;
+}
+
+.budget-card__totals {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  color: #374151;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 12px;
+}
+.budget-card__remaining--over {
+  color: #ef4444;
+  font-weight: 600;
+}
+
 .income-expense-card {
   background: white;
   border: 1px solid #e5e7eb;

@@ -11,6 +11,17 @@ export interface Transaction {
   sourceBank: "kaspi" | "halyk";
 }
 
+export interface BudgetAllocation {
+  id: string;
+  name: string;
+  amount: number;
+}
+
+export interface BudgetPlan {
+  salary: number;
+  allocations: BudgetAllocation[];
+}
+
 export interface FileStatus {
   id: string;
   name: string;

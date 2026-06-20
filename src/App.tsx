@@ -5,19 +5,23 @@ import { SummaryCards } from "./components/SummaryCards";
 import { IncomeExpenseBreakdown } from "./components/IncomeExpenseBreakdown";
 import { ExpensesPieChart } from "./components/ExpensesPieChart";
 import { TopSpending } from "./components/TopSpending";
+import { BudgetPlanner } from "./components/BudgetPlanner";
 import { TransactionsTable } from "./components/TransactionsTable";
 import { parseStatementFile } from "./lib/parseStatement";
 import { clearTransactions, loadTransactions, saveTransactions } from "./lib/storage";
-import type { FileStatus, Transaction } from "./lib/types";
+import { loadBudgetPlan, saveBudgetPlan } from "./lib/budgetStorage";
+import type { BudgetPlan, FileStatus, Transaction } from "./lib/types";
 
 function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [fileStatuses, setFileStatuses] = useState<FileStatus[]>([]);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [budgetPlan, setBudgetPlan] = useState<BudgetPlan>({ salary: 0, allocations: [] });
   const hasLoadedFromStorage = useRef(false);
 
   useEffect(() => {
     setTransactions(loadTransactions());
+    setBudgetPlan(loadBudgetPlan());
     hasLoadedFromStorage.current = true;
   }, []);
 
@@ -25,6 +29,11 @@ function App() {
     if (!hasLoadedFromStorage.current) return;
     saveTransactions(transactions);
   }, [transactions]);
+
+  useEffect(() => {
+    if (!hasLoadedFromStorage.current) return;
+    saveBudgetPlan(budgetPlan);
+  }, [budgetPlan]);
 
   async function handleFilesSelected(files: File[]) {
     const newStatuses: FileStatus[] = files.map((f, i) => ({
@@ -108,6 +117,8 @@ function App() {
 
       <main>
         <FileUpload fileStatuses={fileStatuses} onFilesSelected={handleFilesSelected} />
+
+        <BudgetPlanner plan={budgetPlan} onChange={setBudgetPlan} />
 
         {transactions.length > 0 && (
           <>
